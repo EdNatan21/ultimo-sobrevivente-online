@@ -1,8 +1,11 @@
 const assert = require('node:assert/strict');
-const { S, SPECIAL_OPTIONS } = require('../game-data');
+const fs = require('node:fs');
+const path = require('node:path');
+const { S, SPECIAL_OPTIONS, ITEM } = require('../game-data');
 const { getPlayerOptions, chanceFor } = require('../game-rules');
 
 const player = (items = [], used = [], stats = [2,2,2,2,2]) => ({ stats, items, used });
+const ITEM_PRESENT = id => Object.prototype.hasOwnProperty.call(ITEM, id);
 
 assert.equal(S.length, 10, 'A campanha deve conter 10 cenas');
 
@@ -30,7 +33,15 @@ const lateNormal = chanceFor(player(), S[9].opts[1], 9, 'normal');
 assert.ok(lateNormal < chanceFor(player(), S[9].opts[1], 0, 'normal'), 'As cenas finais devem aplicar penalidade de progressão');
 
 assert.ok(Object.keys(SPECIAL_OPTIONS).length >= 7, 'Os itens especiais devem ter opções contextualizadas');
-assert.ok(S.every(scene => scene.opts.length >= 5), 'Cada cena deve oferecer pelo menos cinco escolhas comuns');
-const maxed = player(['pistola','municao','pe','tenis','sinal','lanterna','colete','kit'], [], [5,5,5,5,5]);
+assert.ok(getPlayerOptions(player(['faca']), 8).some(o => (o[4]||{}).specialItem === 'faca'), 'A faca deve liberar ação especial no confronto com o chefe');
+assert.ok(getPlayerOptions(player(['radio']), 9).some(o => (o[4]||{}).specialItem === 'radio'), 'O rádio deve liberar ação especial na rampa do navio');
+assert.ok(getPlayerOptions(player(['mascara']), 7).some(o => (o[4]||{}).specialItem === 'mascara'), 'A máscara deve liberar ação especial na cena da mordida');
+assert.ok(S.every(scene => scene.opts.length === 7), 'Cada cena deve oferecer sete escolhas comuns');
+assert.ok(S.every(scene => new Set(scene.opts.map(o => o[0])).size === scene.opts.length), 'As escolhas comuns de cada cena não devem se repetir');
+assert.ok(['faca','mascara','radio'].every(id => ITEM_PRESENT(id)), 'As novas recompensas devem existir no catálogo');
+const maxed = player(['pistola','municao','pe','tenis','sinal','lanterna','colete','kit','faca','mascara','radio'], [], [5,5,5,5,5]);
 for (let round=0; round<10; round++) for (const option of getPlayerOptions(maxed, round)) for (const difficulty of ['facil','normal','dificil']) assert.ok(chanceFor(maxed, option, round, difficulty) <= 70, 'Nenhuma probabilidade pode ultrapassar 70%');
+const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+assert.ok(html.includes('class=\"item has-tip\"'), 'O inventário deve exibir descrição do item ao passar o mouse');
+assert.ok(html.includes("if(me&&!me.confirmed)socket.emit('confirm-next')"), 'Jogadores eliminados também devem conseguir confirmar a próxima cena');
 console.log('OK: regras de armas, itens especiais e dificuldades validadas.');

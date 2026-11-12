@@ -1,26 +1,30 @@
-ÚLTIMO SOBREVIVENTE — MULTIPLAYER v0.5
+ÚLTIMO SOBREVIVENTE — MULTIPLAYER v0.6.1
 
+EXECUTAR LOCALMENTE
 1. Instale Node.js 20 ou superior.
-2. Abra o terminal nesta pasta.
+2. Abra o terminal na pasta que contém package.json.
 3. Execute: npm install
 4. Execute: npm start
 5. Acesse: http://localhost:3000
 
-RENDER
+TESTES
+- Execute: npm test
+
+PUBLICAR NO RENDER
+- Root Directory: pasta que contém package.json (deixe vazio se estiver na raiz do repositório).
 - Build Command: npm install
 - Start Command: npm start
-- Root Directory: informe a pasta que contém package.json. Se package.json estiver na raiz do repositório, deixe vazio.
 
-NOVIDADES v0.5
-- Itens com efeitos próprios nas cenas.
-- Opção D especial condicionada ao item necessário.
-- Ações de tiro aparecem somente para quem possui pistola.
-- Munição é consumida ao atirar; sinalizadores são consumidos em ações furtivas.
-- Colete absorve uma falha e é consumido ao proteger o jogador.
-- Anfitrião escolhe a dificuldade dos zumbis no lobby; isso altera as probabilidades junto com a progressão da campanha.
-- Anfitrião pode encerrar a campanha a qualquer momento.
+NOVIDADES v0.6.1
+- Sete escolhas comuns diferentes em cada cena, sem opções duplicadas.
+- Novas recompensas: Faca de resgate, Máscara filtrante e Rádio portátil.
+- Recompensas e itens do inventário exibem seus efeitos ao passar o mouse ou receber foco pelo teclado.
+- Ações especiais liberadas pelas novas recompensas.
+- Resultados e desempates com explicações mais claras.
+- Jogadores eliminados também podem confirmar a continuidade da campanha.
+- Documentação atualizada: HISTORICO-DE-VERSOES.md e HISTORIA-DO-JOGO.md.
 
-Consulte README.md para regras detalhadas e atualização do GitHub/Render.
-
-
-Versão 0.6: resultados reorganizados; escolhas confirmadas visíveis; descrições de recompensas; justificativa de eliminações; desempates exibidos rodada a rodada; limite de 70% nas chances; dificuldade progressiva; avanço automático quando todos os participantes, inclusive eliminados, confirmam. Cada cena agora oferece cinco escolhas comuns, além de ações especiais condicionadas aos itens.
+ARQUIVOS IMPORTANTES
+- README.md: instalação, publicação e regras completas.
+- HISTORICO-DE-VERSOES.md: histórico de alterações.
+- HISTORIA-DO-JOGO.md: história e sequência dos cenários.
