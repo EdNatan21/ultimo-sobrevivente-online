@@ -69,3 +69,6 @@ Além disso, a campanha aumenta a pressão por etapa: infectados rápidos (-5 a 
 ## Atualizar GitHub / Render
 
 Substitua os arquivos pelos desta versão, mantendo `public/index.html` e `public/game-data.js` dentro de `public/`. Faça commit na branch `main` e execute **Manual Deploy → Deploy latest commit** no Render. O valor de Root Directory depende da localização real do `package.json` no repositório.
+
+
+Versão 0.6: resultados reorganizados; escolhas confirmadas visíveis; descrições de recompensas; justificativa de eliminações; desempates exibidos rodada a rodada; limite de 70% nas chances; dificuldade progressiva; avanço automático quando todos os participantes, inclusive eliminados, confirmam. Cada cena agora oferece cinco escolhas comuns, além de ações especiais condicionadas aos itens.

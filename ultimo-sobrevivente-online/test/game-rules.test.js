@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const { S, SPECIAL_OPTIONS } = require('../game-data');
 const { getPlayerOptions, chanceFor } = require('../game-rules');
 
-const player = (items = [], used = []) => ({ stats: [2,2,2,2,2], items, used });
+const player = (items = [], used = [], stats = [2,2,2,2,2]) => ({ stats, items, used });
 
 assert.equal(S.length, 10, 'A campanha deve conter 10 cenas');
 
@@ -21,12 +21,16 @@ assert.equal(pistolAndAmmo.some(o => (o[4] || {}).specialItem === 'municao'), tr
 assert.equal(getPlayerOptions(player(['municao']), 7).some(o => (o[4] || {}).specialItem === 'municao'), false, 'Munição sem pistola não libera a opção especial');
 
 const baseOption = S[0].opts[1];
-const easy = chanceFor(player(), baseOption, 0, 'facil');
-const normal = chanceFor(player(), baseOption, 0, 'normal');
-const hard = chanceFor(player(), baseOption, 0, 'dificil');
+const lowStats = player([], [], [0,0,0,0,0]);
+const easy = chanceFor(lowStats, baseOption, 0, 'facil');
+const normal = chanceFor(lowStats, baseOption, 0, 'normal');
+const hard = chanceFor(lowStats, baseOption, 0, 'dificil');
 assert.ok(easy > normal && normal > hard, 'A dificuldade dos zumbis deve alterar a chance na direção esperada');
 const lateNormal = chanceFor(player(), S[9].opts[1], 9, 'normal');
 assert.ok(lateNormal < chanceFor(player(), S[9].opts[1], 0, 'normal'), 'As cenas finais devem aplicar penalidade de progressão');
 
 assert.ok(Object.keys(SPECIAL_OPTIONS).length >= 7, 'Os itens especiais devem ter opções contextualizadas');
+assert.ok(S.every(scene => scene.opts.length >= 5), 'Cada cena deve oferecer pelo menos cinco escolhas comuns');
+const maxed = player(['pistola','municao','pe','tenis','sinal','lanterna','colete','kit'], [], [5,5,5,5,5]);
+for (let round=0; round<10; round++) for (const option of getPlayerOptions(maxed, round)) for (const difficulty of ['facil','normal','dificil']) assert.ok(chanceFor(maxed, option, round, difficulty) <= 70, 'Nenhuma probabilidade pode ultrapassar 70%');
 console.log('OK: regras de armas, itens especiais e dificuldades validadas.');

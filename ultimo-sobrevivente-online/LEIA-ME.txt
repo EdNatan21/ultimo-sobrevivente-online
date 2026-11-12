@@ -21,3 +21,6 @@ NOVIDADES v0.5
 - Anfitrião pode encerrar a campanha a qualquer momento.
 
 Consulte README.md para regras detalhadas e atualização do GitHub/Render.
+
+
+Versão 0.6: resultados reorganizados; escolhas confirmadas visíveis; descrições de recompensas; justificativa de eliminações; desempates exibidos rodada a rodada; limite de 70% nas chances; dificuldade progressiva; avanço automático quando todos os participantes, inclusive eliminados, confirmam. Cada cena agora oferece cinco escolhas comuns, além de ações especiais condicionadas aos itens.

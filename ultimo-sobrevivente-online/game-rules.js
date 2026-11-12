@@ -24,7 +24,7 @@ function chanceFor(player, option, round, zombieDifficulty) {
   }, 0);
   const globalModifier = ZOMBIE_DIFFICULTIES[zombieDifficulty]?.modifier ?? 0;
   const stageModifier = STAGE_MODIFIERS[round] ?? 0;
-  return Math.max(5, Math.min(95, base + 8 * (player.stats[attrIndex] || 0) + bonus + globalModifier + stageModifier));
+  return Math.max(5, Math.min(70, base + 8 * (player.stats[attrIndex] || 0) + bonus + globalModifier + stageModifier));
 }
 
 module.exports = { hasItem, getPlayerOptions, chanceFor };
