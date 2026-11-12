@@ -3,7 +3,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const crypto = require('crypto');
 const path = require('path');
-const { ATTRS, ITEM, S, SCENE_CONTEXT } = require('./game-data');
+const { ATTRS, ITEM, S, SCENE_CONTEXT, ZOMBIE_DIFFICULTIES, STAGE_MODIFIERS } = require('./game-data');
+const { hasItem, getPlayerOptions, chanceFor } = require('./game-rules');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,44 +19,69 @@ const makeToken = () => crypto.randomBytes(24).toString('hex');
 const cleanName = s => String(s || 'Sobrevivente').trim().replace(/[<>]/g, '').slice(0, 18) || 'Sobrevivente';
 const validStats = a => Array.isArray(a) && a.length === 5 && a.every(n => Number.isInteger(n) && n >= 0 && n <= 5) && a.reduce((x, y) => x + y, 0) === 10;
 const alivePlayers = r => [...r.players.values()].filter(p => p.alive);
-
-function roomState(r) {
+function roomState(r, viewer) {
+  const stageModifier = STAGE_MODIFIERS[r.round] ?? 0;
+  const scene = r.phase === 'lobby' ? null : {
+    ...S[r.round], context: SCENE_CONTEXT[r.round],
+    opts: viewer ? getPlayerOptions(viewer, r.round) : S[r.round].opts,
+    stageModifier,
+    zombieModifier: ZOMBIE_DIFFICULTIES[r.zombieDifficulty]?.modifier ?? 0
+  };
   return {
     code: r.code, hostId: r.hostId, phase: r.phase, round: r.round,
-    scene: r.phase === 'lobby' ? null : { ...S[r.round], context: SCENE_CONTEXT[r.round] },
+    zombieDifficulty: r.zombieDifficulty,
+    zombieDifficultyLabel: ZOMBIE_DIFFICULTIES[r.zombieDifficulty]?.label || 'Normal',
+    scene,
     players: [...r.players.values()].map(p => ({
       id: p.id, name: p.name, stats: p.stats, alive: p.alive, ready: p.ready,
       choiceSubmitted: p.choice !== null, confirmed: p.confirmed, items: p.items,
       used: p.used, disconnected: p.disconnected
     })),
-    results: r.results
+    results: r.results,
+    endReason: r.endReason || null
   };
 }
-function broadcast(r) { io.to(r.code).emit('room-state', roomState(r)); }
+function broadcast(r) {
+  for (const p of r.players.values()) {
+    if (p.socketId) io.to(p.socketId).emit('room-state', roomState(r, p));
+  }
+}
 function getRoom(socket) { const code = socket.data.room; return code ? rooms.get(code) : null; }
 function getPlayer(r, socket) { return r && [...r.players.values()].find(p => p.socketId === socket.id); }
 function fail(socket, message) { socket.emit('app-error', message); }
-function calculateChance(p, option) {
-  const [, attr, difficulty] = option;
-  const base = { facil: 75, medio: 60, dificil: 45 }[difficulty] ?? 45;
-  const attrIndex = ATTRS.findIndex(a => a[0] === attr);
-  const bonus = p.items.reduce((sum, id) => {
-    const item = ITEM[id];
-    return sum + (item && item.attr === attr && (item.type !== 'consumivel' || !p.used.includes(id)) ? item.bonus : 0);
-  }, 0);
-  return Math.min(95, base + 8 * (p.stats[attrIndex] || 0) + bonus);
+function finishCampaign(r, reason) {
+  r.phase = 'finished'; r.endReason = reason;
+  broadcast(r);
+  io.to(r.code).emit('game-finished');
 }
 function resolveRound(r) {
   const outcomes = [];
   for (const p of alivePlayers(r)) {
-    const option = S[r.round].opts[p.choice];
-    const probability = calculateChance(p, option);
+    const options = getPlayerOptions(p, r.round);
+    const option = options[p.choice];
+    if (!option) continue;
+    const probability = chanceFor(p, option, r.round, r.zombieDifficulty);
     const roll = 1 + Math.floor(Math.random() * 100);
     const success = roll <= probability;
     const [, attr] = option;
-    const consumed = p.items.filter(id => ITEM[id]?.attr === attr && ITEM[id]?.type === 'consumivel' && !p.used.includes(id));
-    p.used.push(...consumed);
-    outcomes.push({ playerId: p.id, name: p.name, choice: p.choice, option: option[0], probability, roll, success, itemId: success ? (option[3] || null) : null });
+    const meta = option[4] || {};
+    const consumed = Array.isArray(meta.consumes) ? meta.consumes.filter(id => hasItem(p, id)) : [];
+    if (meta.usesAmmo && hasItem(p, 'municao') && !consumed.includes('municao')) consumed.push('municao');
+    if (meta.usesSignal && hasItem(p, 'sinal') && !consumed.includes('sinal')) consumed.push('sinal');
+    if (consumed.length) p.used.push(...consumed);
+    if (success && meta.consumeOnSuccess && meta.specialItem && hasItem(p, meta.specialItem)) p.used.push(meta.specialItem);
+    let protectedByVest = false;
+    if (!success && hasItem(p, 'colete') && !consumed.includes('colete')) {
+      p.used.push('colete');
+      protectedByVest = true;
+    }
+    outcomes.push({
+      playerId: p.id, name: p.name, choice: p.choice, option: option[0], probability, roll, success,
+      itemId: success ? (option[3] || null) : null,
+      specialItem: meta.specialItem || null,
+      consumed,
+      protectedByVest
+    });
   }
   const itemGroups = new Map();
   outcomes.filter(o => o.success && o.itemId).forEach(o => {
@@ -67,12 +93,12 @@ function resolveRound(r) {
     group.forEach(o => { o.lootRoll = group.length > 1 ? 1 + Math.floor(Math.random() * 20) : null; });
     const winner = [...group].sort((a, b) => (b.lootRoll || 0) - (a.lootRoll || 0))[0];
     const player = r.players.get(winner.playerId);
-    player.items.push(itemId);
+    if (!player.items.includes(itemId)) player.items.push(itemId);
     loot.push({ itemId, itemName: ITEM[itemId].name, winnerId: winner.playerId, winnerName: winner.name, rolls: group.map(o => ({ playerId: o.playerId, name: o.name, roll: o.lootRoll })) });
   }
   outcomes.forEach(o => {
     const p = r.players.get(o.playerId);
-    if (!o.success) p.alive = false;
+    if (!o.success && !o.protectedByVest) p.alive = false;
     p.confirmed = !p.alive;
   });
   r.results = { round: r.round, outcomes, loot };
@@ -84,9 +110,9 @@ function resolveRound(r) {
 io.on('connection', socket => {
   socket.on('create-room', ({ name, token } = {}) => {
     let code; do { code = makeCode(); } while (rooms.has(code));
-    const player = { id: token || makeToken(), token: token || null, socketId: socket.id, name: cleanName(name), stats: [2,2,2,2,2], alive: true, ready: false, choice: null, confirmed: false, items: [], used: [], disconnected: false };
-    player.token = player.token || player.id;
-    const r = { code, hostId: player.id, phase: 'lobby', round: 0, players: new Map([[player.id, player]]), results: null };
+    const id = token || makeToken();
+    const player = { id, token: id, socketId: socket.id, name: cleanName(name), stats: [2,2,2,2,2], alive: true, ready: false, choice: null, confirmed: false, items: [], used: [], disconnected: false };
+    const r = { code, hostId: player.id, phase: 'lobby', round: 0, players: new Map([[player.id, player]]), results: null, zombieDifficulty: 'normal', endReason: null };
     rooms.set(code, r); socket.join(code); socket.data.room = code; socket.data.playerId = player.id;
     socket.emit('room-created', { code, playerId: player.id, token: player.token }); broadcast(r);
   });
@@ -99,7 +125,7 @@ io.on('connection', socket => {
     if (existing) {
       existing.socketId = socket.id; existing.disconnected = false;
       socket.join(code); socket.data.room = code; socket.data.playerId = existing.id;
-      socket.emit('rejoined-room', { code, playerId: existing.id, token: existing.token, state: roomState(r) }); broadcast(r); return;
+      socket.emit('rejoined-room', { code, playerId: existing.id, token: existing.token, state: roomState(r, existing) }); broadcast(r); return;
     }
     if (r.phase !== 'lobby') return fail(socket, 'Esta partida já começou. Não é possível entrar agora.');
     if (r.players.size >= MAX_PLAYERS) return fail(socket, 'A sala está cheia (máximo de 8 jogadores).');
@@ -113,7 +139,14 @@ io.on('connection', socket => {
     const r = getRoom(socket), p = getPlayer(r, socket);
     if (!r || !p || r.phase !== 'lobby') return;
     if (!validStats(stats)) return fail(socket, 'Distribua exatamente 10 pontos, com no máximo 5 por atributo.');
-    p.stats = stats; p.ready = true; broadcast(r);
+    p.stats = [...stats]; p.ready = true; broadcast(r);
+  });
+  socket.on('set-zombie-difficulty', ({ difficulty } = {}) => {
+    const r = getRoom(socket), p = getPlayer(r, socket);
+    if (!r || !p || r.phase !== 'lobby') return;
+    if (r.hostId !== p.id) return fail(socket, 'Somente o anfitrião pode alterar a dificuldade dos zumbis.');
+    if (!Object.prototype.hasOwnProperty.call(ZOMBIE_DIFFICULTIES, difficulty)) return fail(socket, 'Dificuldade inválida.');
+    r.zombieDifficulty = difficulty; broadcast(r);
   });
   socket.on('start-game', () => {
     const r = getRoom(socket), p = getPlayer(r, socket);
@@ -125,7 +158,8 @@ io.on('connection', socket => {
   socket.on('submit-choice', ({ choice } = {}) => {
     const r = getRoom(socket), p = getPlayer(r, socket);
     if (!r || !p || r.phase !== 'playing' || !p.alive) return;
-    if (!Number.isInteger(choice) || choice < 0 || choice > 2) return fail(socket, 'Escolha inválida.');
+    const options = getPlayerOptions(p, r.round);
+    if (!Number.isInteger(choice) || choice < 0 || choice >= options.length) return fail(socket, 'Escolha inválida ou item necessário indisponível.');
     if (p.choice !== null) return fail(socket, 'Você já confirmou sua escolha nesta cena.');
     p.choice = choice; broadcast(r);
     if (alivePlayers(r).every(x => x.choice !== null)) resolveRound(r);
@@ -140,35 +174,29 @@ io.on('connection', socket => {
     const r = getRoom(socket), p = getPlayer(r, socket);
     if (!r || !p || r.hostId !== p.id || r.phase !== 'results') return fail(socket, 'Somente o anfitrião pode avançar a cena.');
     if (alivePlayers(r).some(x => !x.confirmed)) return fail(socket, 'Ainda há sobreviventes que não confirmaram.');
-    if (r.round >= 9 || alivePlayers(r).length === 0) {
-      r.phase = 'finished'; broadcast(r); io.to(r.code).emit('game-finished'); return;
-    }
+    if (r.round >= 9 || alivePlayers(r).length === 0) return finishCampaign(r, 'natural');
     r.round++; r.phase = 'playing'; r.results = null;
     for (const player of r.players.values()) { player.choice = null; player.confirmed = !player.alive; }
     broadcast(r); io.to(r.code).emit('new-round', { round: r.round });
   });
+  socket.on('end-campaign', () => {
+    const r = getRoom(socket), p = getPlayer(r, socket);
+    if (!r || !p || r.hostId !== p.id) return fail(socket, 'Somente o anfitrião pode encerrar a campanha.');
+    if (r.phase === 'finished') return;
+    finishCampaign(r, 'host');
+  });
   socket.on('leave-room', () => {
-    const r = getRoom(socket);
-    const p = getPlayer(r, socket);
+    const r = getRoom(socket), p = getPlayer(r, socket);
     if (!r || !p) return;
-    r.players.delete(p.id);
-    socket.leave(r.code);
-    socket.data.room = null;
-    socket.data.playerId = null;
+    r.players.delete(p.id); socket.leave(r.code); socket.data.room = null; socket.data.playerId = null;
     if (r.hostId === p.id) {
       const successor = [...r.players.values()].find(candidate => !candidate.disconnected);
       r.hostId = successor ? successor.id : null;
     }
-    if (r.players.size === 0) {
-      rooms.delete(r.code);
-      return;
-    }
+    if (r.players.size === 0) { rooms.delete(r.code); return; }
     broadcast(r);
-    if (r.phase === 'results' && alivePlayers(r).length && alivePlayers(r).every(x => x.confirmed)) {
-      io.to(r.code).emit('everyone-confirmed');
-    }
+    if (r.phase === 'results' && alivePlayers(r).length && alivePlayers(r).every(x => x.confirmed)) io.to(r.code).emit('everyone-confirmed');
   });
-
   socket.on('disconnect', () => {
     const r = getRoom(socket); if (!r) return;
     const p = getPlayer(r, socket); if (p) p.disconnected = true;

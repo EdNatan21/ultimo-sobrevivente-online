@@ -1,32 +1,23 @@
-ÚLTIMO SOBREVIVENTE — MULTIPLAYER v0.4
+ÚLTIMO SOBREVIVENTE — MULTIPLAYER v0.5
 
-Esta versão integra a interface ao servidor Socket.IO. Não é mais apenas uma infraestrutura de salas.
-
-RODAR LOCALMENTE:
-1. Instale Node.js 20 ou superior: https://nodejs.org/
-2. Abra um terminal nesta pasta.
+1. Instale Node.js 20 ou superior.
+2. Abra o terminal nesta pasta.
 3. Execute: npm install
 4. Execute: npm start
-5. Abra http://localhost:3000
+5. Acesse: http://localhost:3000
 
-PUBLICAR PARA JOGAR COM AMIGOS:
-1. Envie todos os arquivos para um repositório GitHub.
-2. No Render, crie um Web Service conectado ao repositório.
-3. Build Command: npm install
-4. Start Command: npm start
-5. Publique e compartilhe o endereço HTTPS criado pelo Render.
+RENDER
+- Build Command: npm install
+- Start Command: npm start
+- Root Directory: informe a pasta que contém package.json. Se package.json estiver na raiz do repositório, deixe vazio.
 
-ARQUIVOS:
-- server.js: servidor multiplayer e regras autoritativas.
-- game-data.js: cenas, atributos e itens compartilhados.
-- public/index.html: interface do jogo.
+NOVIDADES v0.5
+- Itens com efeitos próprios nas cenas.
+- Opção D especial condicionada ao item necessário.
+- Ações de tiro aparecem somente para quem possui pistola.
+- Munição é consumida ao atirar; sinalizadores são consumidos em ações furtivas.
+- Colete absorve uma falha e é consumido ao proteger o jogador.
+- Anfitrião escolhe a dificuldade dos zumbis no lobby; isso altera as probabilidades junto com a progressão da campanha.
+- Anfitrião pode encerrar a campanha a qualquer momento.
 
-MODO DE JOGO:
-- Salas privadas por código, 2 a 8 pessoas.
-- Distribuição individual de atributos.
-- Escolhas simultâneas e resultados sincronizados.
-- Resolução das probabilidades e disputa de itens no servidor.
-- Confirmação de todos os sobreviventes antes de avançar.
-- Sem bots no fluxo principal.
-
-Limitação: salas são mantidas em memória. Se o servidor reiniciar, as partidas em andamento são encerradas.
+Consulte README.md para regras detalhadas e atualização do GitHub/Render.

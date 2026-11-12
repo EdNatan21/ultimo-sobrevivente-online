@@ -1,6 +1,6 @@
-# Último Sobrevivente — Multiplayer v0.4
+# Último Sobrevivente — Multiplayer v0.5.0
 
-Jogo web multiplayer em tempo real para 2 a 8 pessoas, com salas por código, atributos individuais, escolhas simultâneas, resolução no servidor, itens e confirmação coletiva.
+Jogo web multiplayer em tempo real para 2 a 8 pessoas, com salas por código, atributos individuais, escolhas simultâneas, resolução no servidor, itens com efeitos e confirmação coletiva.
 
 ## Rodar no computador
 
@@ -10,21 +10,20 @@ Jogo web multiplayer em tempo real para 2 a 8 pessoas, com salas por código, at
 4. Execute `npm start`.
 5. Abra http://localhost:3000.
 
-Para testar com duas pessoas na mesma rede local, ambas podem acessar o IP local do computador que está executando o servidor, na porta 3000. Para amigos em outras redes, publique como serviço Node no Render.
-
 ## Publicar no Render
 
-1. Envie todos os arquivos desta pasta para um repositório GitHub.
-2. No Render, crie um **New Web Service** e conecte o repositório.
-3. Configure Runtime/Language como Node, Build Command `npm install` e Start Command `npm start`.
-4. Use uma instância que mantenha o serviço ativo. O plano gratuito pode suspender após inatividade.
-5. Abra o endereço HTTPS gerado pelo Render e compartilhe com os amigos.
+1. Envie todos os arquivos desta pasta para o repositório GitHub.
+2. Se o projeto estiver dentro da pasta `ultimo-sobrevivente-online`, configure essa pasta em **Root Directory** no Render. Se os arquivos estiverem na raiz do repositório, deixe Root Directory vazio.
+3. Configure Build Command `npm install` e Start Command `npm start`.
+4. Abra o endereço HTTPS gerado pelo Render e compartilhe com os amigos.
 
 ## Estrutura
 
-- `server.js`: servidor HTTP e Socket.IO; controla salas, jogadores, escolhas, rolagens, itens e confirmações.
-- `game-data.js`: dados de atributos, itens, cenas e contexto compartilhados entre servidor e navegador.
+- `server.js`: servidor HTTP e Socket.IO; controla salas, jogadores, escolhas, probabilidades, rolagens, efeitos dos itens e confirmações.
+- `game-rules.js`: valida opções disponíveis por jogador e calcula probabilidades.
+- `game-data.js`: atributos, itens, cenas, escolhas especiais e ajustes de dificuldade.
 - `public/index.html`: interface do jogo.
+- `public/game-data.js`: catálogo compartilhado com a interface do navegador.
 
 ## Regras multiplayer
 
@@ -33,21 +32,40 @@ Para testar com duas pessoas na mesma rede local, ambas podem acessar o IP local
 - Cada jogador distribui 10 pontos entre Pontaria, Velocidade, Força, Furtividade e Vigor (máximo 5 por atributo).
 - O anfitrião só pode iniciar quando todos estiverem prontos.
 - As escolhas são individuais e ficam ocultas até todos os sobreviventes escolherem.
-- O servidor calcula as chances, rolagens e disputas de itens; nenhum jogador publica o resultado.
+- O servidor calcula as chances, rolagens, proteção do colete e disputas de itens.
 - Cada sobrevivente confirma no próprio dispositivo. O anfitrião avança quando todos os vivos confirmarem.
-- O navegador guarda um token local para permitir retorno à sala após uma desconexão/atualização, enquanto o processo do servidor continuar ativo.
+- O anfitrião pode encerrar a campanha a qualquer momento pelo botão **Encerrar campanha**.
+- O navegador guarda um token local para permitir retorno à sala enquanto o processo do servidor continuar ativo.
 
-## Limitações desta versão
+## Itens e uso nas cenas — v0.5.0
+
+- **Pistola:** libera as opções de tiro. Opções de tiro não aparecem para quem não tem pistola.
+- **Munição:** aumenta a chance de ações com arma e é consumida quando o jogador atira; também libera uma ação especial de cobertura com a pistola.
+- **Pé de cabra:** concede bônus de Força e libera uma ação especial para abrir o portão da praça.
+- **Tênis de corrida:** concede bônus de Velocidade e libera uma ação especial para atravessar a avenida durante a perseguição.
+- **Sinalizadores:** concedem bônus para Furtividade e são consumidos quando usados em uma ação furtiva; ajudam a distrair os infectados.
+- **Lanterna:** concede bônus de Furtividade e libera uma ação especial para iluminar os trilhos do metrô.
+- **Colete:** concede bônus de Vigor e absorve uma falha, sendo consumido ao proteger o jogador. Também libera uma ação especial no confronto final.
+- **Kit médico:** concede bônus de Vigor e libera uma ação especial para tratar os ferimentos antes do chefe; é consumido ao usar essa ação.
+
+As ações especiais aparecem como **Opção D** somente para quem possui o item exigido e ele ainda está disponível. As escolhas de tiro exigem a pistola.
+
+## Dificuldade dos zumbis e probabilidades
+
+O anfitrião escolhe a dificuldade no lobby:
+
+- **Fácil:** +10 pontos percentuais nas chances.
+- **Normal:** sem ajuste global.
+- **Difícil:** -10 pontos percentuais nas chances.
+
+Além disso, a campanha aumenta a pressão por etapa: infectados rápidos (-5 a -8 pontos) e confrontos com o chefe (-15 e -20 pontos). A chance final é recalculada no servidor e exibida em cada opção, considerando atributo, item, dificuldade selecionada e etapa da campanha. O cálculo tem teste automatizado: execute `npm test`. O resultado fica limitado entre 5% e 95%.
+
+## Limitações
 
 - As salas ficam na memória do processo; reiniciar/reimplantar o servidor encerra as partidas em andamento.
 - A reconexão funciona enquanto a sala ainda existir no mesmo processo e o navegador conservar os dados locais.
-- Não há chat, contas, banco de dados ou painel administrativo.
+- Não há chat, contas ou banco de dados persistente.
 
-## Correções da versão 0.4.1
+## Atualizar GitHub / Render
 
-- Adicionado o botão **Sair da campanha** no lobby, durante a partida e na tela final. Ao sair, o jogador é removido da sala e, se era o anfitrião, a liderança passa para outro jogador conectado.
-- Corrigido o estado dos atributos no lobby: atualizações de outros jogadores não sobrescrevem a distribuição local ainda não confirmada. Depois de confirmar, os atributos ficam bloqueados e são mantidos pelo servidor durante a campanha.
-
-### Atualização no GitHub / Render
-
-Substitua os arquivos do diretório `ultimo-sobrevivente-online` pelos arquivos desta versão, mantendo `public/index.html` e `public/game-data.js` dentro de `public/`. Faça commit na branch `main` e execute um novo deploy no Render. Se o repositório mantém o projeto dentro da pasta `ultimo-sobrevivente-online`, mantenha esse valor em **Root Directory**.
+Substitua os arquivos pelos desta versão, mantendo `public/index.html` e `public/game-data.js` dentro de `public/`. Faça commit na branch `main` e execute **Manual Deploy → Deploy latest commit** no Render. O valor de Root Directory depende da localização real do `package.json` no repositório.
