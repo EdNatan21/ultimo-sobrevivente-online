@@ -16,7 +16,8 @@ function getPlayerOptions(player, round) {
 
 function chanceFor(player, option, round, zombieDifficulty) {
   const [, attr, difficulty] = option;
-  const base = { facil: 75, medio: 60, dificil: 45 }[difficulty] ?? 45;
+  const base = { facil: 68, medio: 52, dificil: 36 }[difficulty] ?? 36;
+  const rewardPenalty = option[3] ? 10 : 0;
   const attrIndex = ATTRS.findIndex(a => a[0] === attr);
   const bonus = player.items.reduce((sum, id) => {
     const item = ITEM[id];
@@ -24,7 +25,7 @@ function chanceFor(player, option, round, zombieDifficulty) {
   }, 0);
   const globalModifier = ZOMBIE_DIFFICULTIES[zombieDifficulty]?.modifier ?? 0;
   const stageModifier = STAGE_MODIFIERS[round] ?? 0;
-  return Math.max(5, Math.min(70, base + 8 * (player.stats[attrIndex] || 0) + bonus + globalModifier + stageModifier));
+  return Math.max(5, Math.min(70, base - rewardPenalty + 4 * (player.stats[attrIndex] || 0) + bonus + globalModifier + stageModifier));
 }
 
 module.exports = { hasItem, getPlayerOptions, chanceFor };

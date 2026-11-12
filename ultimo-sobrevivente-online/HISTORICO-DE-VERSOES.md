@@ -2,13 +2,24 @@
 
 Este arquivo registra as alterações conhecidas do projeto. Nas versões antigas, algumas datas e detalhes não estavam registrados nos arquivos preservados; nesses casos, o histórico informa apenas o que foi possível confirmar, sem inventar mudanças.
 
+## v0.6.2 — 12/11/2026
+- Probabilidade-base por nível de escolha: Fácil 68, Médio 52 e Difícil 36.
+- Escolhas que oferecem recompensa recebem penalidade-base de 10 pontos em relação a opções sem recompensa do mesmo nível.
+- Reduzidos os bônus de atributo dos itens.
+- Removidas da interface as porcentagens das escolhas e as descrições/tooltips das recompensas.
+- Dificuldades coloridas: Fácil em verde, Médio em laranja e Difícil em vermelho.
+- Escolhas individuais ocultas para os demais jogadores até todos os jogadores vivos enviarem uma escolha.
+- Jogadores eliminados deixam de precisar confirmar a próxima cena.
+- Adicionada ao anfitrião a opção de forçar o avanço para a próxima cena.
+- Atualizados README, instruções rápidas, dados do navegador e testes automatizados.
+
 ## v0.6.1 — 12/11/2026
 - Adicionadas três recompensas permanentes: Faca de resgate (+12% Força), Máscara filtrante (+12% Vigor) e Rádio portátil (+12% Furtividade).
 - Cada nova recompensa também libera uma ação contextual em uma cena posterior.
 - Substituídas escolhas repetidas por alternativas diferentes; agora há sete escolhas comuns exclusivas em cada cena, além das ações especiais condicionadas a itens.
 - Adicionados tooltips ao passar o mouse ou focar por teclado nas recompensas possíveis e nos itens do inventário, explicando seus efeitos.
 - Melhorada a leitura dos resultados: interpretação da rolagem e identificação de quem venceu cada rodada de desempate.
-- Corrigido o botão de confirmação para permitir que jogadores eliminados também confirmem a continuidade; o servidor já aguardava a confirmação de todos os participantes.
+- Corrigido o botão de confirmação para permitir que jogadores eliminados também confirmem a continuidade; a confirmação de todos os participantes era exigida até a v0.6.1.
 - Atualizados README, instruções rápidas, versão do pacote e documentação da história.
 
 ## v0.6.0 — 12/11/2026

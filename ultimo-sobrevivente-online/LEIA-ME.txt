@@ -1,4 +1,4 @@
-ÚLTIMO SOBREVIVENTE — MULTIPLAYER v0.6.1
+ÚLTIMO SOBREVIVENTE — MULTIPLAYER v0.6.2
 
 EXECUTAR LOCALMENTE
 1. Instale Node.js 20 ou superior.
@@ -15,7 +15,7 @@ PUBLICAR NO RENDER
 - Build Command: npm install
 - Start Command: npm start
 
-NOVIDADES v0.6.1
+NOVIDADES v0.6.2
 - Sete escolhas comuns diferentes em cada cena, sem opções duplicadas.
 - Novas recompensas: Faca de resgate, Máscara filtrante e Rádio portátil.
 - Recompensas e itens do inventário exibem seus efeitos ao passar o mouse ou receber foco pelo teclado.

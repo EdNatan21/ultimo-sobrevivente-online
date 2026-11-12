@@ -1,4 +1,4 @@
-# Último Sobrevivente — Multiplayer v0.6.1
+# Último Sobrevivente — Multiplayer v0.6.2
 
 Jogo web multiplayer de sobrevivência zumbi para 2 a 8 pessoas. Os jogadores atravessam dez cenas, fazem escolhas individuais, encontram equipamentos e tentam alcançar o navio de evacuação.
 
@@ -39,34 +39,37 @@ Para validar as regras, execute `npm test`.
 - Cada jogador distribui 10 pontos entre Pontaria, Velocidade, Força, Furtividade e Vigor, com máximo de 5 por atributo.
 - O anfitrião inicia a partida quando todos estiverem prontos e escolhe a dificuldade dos zumbis.
 - Cada cena oferece sete escolhas comuns diferentes. Ações especiais adicionais aparecem quando o jogador possui o item exigido.
-- As escolhas confirmadas ficam visíveis para o grupo. O servidor resolve os testes e as disputas de recompensas.
+- As escolhas ficam ocultas para os demais até todos os jogadores vivos escolherem. Depois disso, o grupo vê as escolhas e os resultados. O servidor resolve os testes e as disputas de recompensas.
 - A chance de sucesso considera atributo, item, dificuldade e etapa da campanha; fica entre 5% e 70%.
-- Após os resultados, todos os participantes da sala — inclusive os eliminados — precisam confirmar para avançar.
+- Após os resultados, somente os jogadores vivos precisam confirmar para avançar. O anfitrião pode forçar a próxima cena sem esperar as confirmações pendentes.
 - O anfitrião pode encerrar a campanha a qualquer momento.
 
 ## Itens e recompensas
 
-Os itens podem conceder bônus de atributo, liberar ações especiais, ser consumidos ou proteger contra uma falha fatal. Passe o mouse sobre uma recompensa ou item do inventário (ou foque-o pelo teclado) para consultar a descrição e o efeito.
+Os itens podem conceder bônus de atributo, liberar ações especiais, ser consumidos ou proteger contra uma falha fatal. As recompensas e os itens são exibidos apenas pelo nome, sem descrições ou tooltips na interface.
 
 | Item | Efeito |
 |---|---|
-| Pistola | Libera escolhas de tiro e concede +12% em Pontaria. |
-| Munição | Concede +25% em Pontaria enquanto disponível; é consumida em ações de disparo. |
-| Pé de cabra | +12% em Força e libera uma ação especial para abrir obstáculos. |
-| Tênis de corrida | +12% em Velocidade. |
-| Sinalizadores | +18% em Furtividade enquanto disponíveis; podem ser consumidos para distrair infectados. |
-| Lanterna | +12% em Furtividade e libera uma ação especial em áreas escuras. |
-| Colete | +8% em Vigor; absorve uma falha fatal e é consumido. |
-| Kit de primeiros socorros | +20% em Vigor enquanto disponível; pode ser consumido para tratar ferimentos. |
-| Faca de resgate | +12% em Força e libera uma ação especial contra o Anfitrião. |
-| Máscara filtrante | +12% em Vigor e libera uma ação especial para proteção contra fluidos infectados. |
-| Rádio portátil | +12% em Furtividade e libera uma ação especial de distração. |
+| Pistola | Libera escolhas de tiro e concede +5 pontos em Pontaria. |
+| Munição | Concede +4 pontos em Pontaria enquanto disponível; é consumida em ações de disparo. |
+| Pé de cabra | +5 pontos em Força e libera uma ação especial para abrir obstáculos. |
+| Tênis de corrida | +5 pontos em Velocidade. |
+| Sinalizadores | +6 pontos em Furtividade enquanto disponíveis; podem ser consumidos para distrair infectados. |
+| Lanterna | +5 pontos em Furtividade e libera uma ação especial em áreas escuras. |
+| Colete | +4 pontos em Vigor; absorve uma falha fatal e é consumido. |
+| Kit de primeiros socorros | +7 pontos em Vigor enquanto disponível; pode ser consumido para tratar ferimentos. |
+| Faca de resgate | +5 pontos em Força e libera uma ação especial contra o Anfitrião. |
+| Máscara filtrante | +5 pontos em Vigor e libera uma ação especial para proteção contra fluidos infectados. |
+| Rádio portátil | +5 pontos em Furtividade e libera uma ação especial de distração. |
 
 ## Dificuldade e probabilidades
 
-- **Fácil:** +10 pontos percentuais.
-- **Normal:** sem ajuste global.
-- **Difícil:** -10 pontos percentuais.
+- **Fácil:** base de 68 pontos percentuais.
+- **Médio:** base de 52 pontos percentuais.
+- **Difícil:** base de 36 pontos percentuais.
+- Escolhas que oferecem uma recompensa começam com 10 pontos percentuais a menos que escolhas sem recompensa do mesmo nível.
+- Cada ponto no atributo usado acrescenta 4 pontos percentuais; itens concedem bônus reduzidos, entre 4 e 7 pontos percentuais.
+- A dificuldade global dos zumbis e a progressão das cenas também modificam a chance; o resultado final permanece entre 5% e 70%.
 
 A campanha aplica penalidades progressivas conforme os infectados se tornam mais perigosos. O limite máximo continua em 70%, mesmo com atributos e itens elevados.
 

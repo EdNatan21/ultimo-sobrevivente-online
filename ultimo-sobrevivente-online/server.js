@@ -20,6 +20,7 @@ const cleanName = s => String(s || 'Sobrevivente').trim().replace(/[<>]/g, '').s
 const validStats = a => Array.isArray(a) && a.length === 5 && a.every(n => Number.isInteger(n) && n >= 0 && n <= 5) && a.reduce((x, y) => x + y, 0) === 10;
 const alivePlayers = r => [...r.players.values()].filter(p => p.alive);
 function roomState(r, viewer) {
+  const revealChoices = r.phase === 'results' || (alivePlayers(r).length > 0 && alivePlayers(r).every(p => p.choice !== null));
   const stageModifier = STAGE_MODIFIERS[r.round] ?? 0;
   const scene = r.phase === 'lobby' ? null : {
     ...S[r.round], context: SCENE_CONTEXT[r.round],
@@ -34,7 +35,7 @@ function roomState(r, viewer) {
     scene,
     players: [...r.players.values()].map(p => ({
       id: p.id, name: p.name, stats: p.stats, alive: p.alive, ready: p.ready,
-      choiceSubmitted: p.choice !== null, choiceIndex: p.choice, choiceLabel: p.choiceLabel || null, confirmed: p.confirmed, items: p.items,
+      choiceSubmitted: revealChoices ? p.choice !== null : (!!viewer && viewer.id === p.id && p.choice !== null), choiceIndex: (revealChoices || (!!viewer && viewer.id === p.id)) ? p.choice : null, choiceLabel: (revealChoices || (!!viewer && viewer.id === p.id)) ? (p.choiceLabel || null) : null, confirmed: p.confirmed, items: p.items,
       used: p.used, disconnected: p.disconnected
     })),
     results: r.results,
@@ -176,8 +177,8 @@ io.on('connection', socket => {
     p.choice = choice; p.choiceLabel = options[choice][0]; broadcast(r);
     if (alivePlayers(r).every(x => x.choice !== null)) resolveRound(r);
   });
-  function advanceWhenEveryoneConfirmed(r) {
-    if (r.phase !== 'results' || [...r.players.values()].some(x => !x.confirmed)) return;
+  function advanceWhenEveryoneConfirmed(r, forced = false) {
+    if (r.phase !== 'results' || (!forced && alivePlayers(r).some(x => !x.confirmed))) return;
     if (r.round >= 9 || alivePlayers(r).length === 0) return finishCampaign(r, 'natural');
     r.round++; r.phase = 'playing'; r.results = null;
     for (const player of r.players.values()) { player.choice = null; player.choiceLabel = null; player.confirmed = false; }
@@ -186,8 +187,15 @@ io.on('connection', socket => {
   socket.on('confirm-next', () => {
     const r = getRoom(socket), p = getPlayer(r, socket);
     if (!r || !p || r.phase !== 'results') return;
+    if (!p.alive) return;
     p.confirmed = true; broadcast(r);
     advanceWhenEveryoneConfirmed(r);
+  });
+  socket.on('force-next', () => {
+    const r = getRoom(socket), p = getPlayer(r, socket);
+    if (!r || !p || r.phase !== 'results') return;
+    if (r.hostId !== p.id) return fail(socket, 'Somente o anfitrião pode forçar a próxima cena.');
+    advanceWhenEveryoneConfirmed(r, true);
   });
   socket.on('end-campaign', () => {
     const r = getRoom(socket), p = getPlayer(r, socket);

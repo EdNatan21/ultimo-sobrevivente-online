@@ -4,17 +4,17 @@ const ATTRS=[
 ];
 // Itens têm funções distintas: bônus, munição, proteção ou acesso a ações especiais.
 const ITEM={
- pistola:{name:'Pistola',description:'Libera escolhas de tiro e concede +12% em testes de Pontaria. Não consome munição por padrão.',attr:'Pontaria',bonus:12,type:'weapon'},
- municao:{name:'Munição',description:'Concede +25% em Pontaria enquanto disponível. É consumida em ações que exigem disparos.',attr:'Pontaria',bonus:25,type:'consumivel'},
- pe:{name:'Pé de cabra',description:'Concede +12% em Força e libera ações especiais para arrombar portas e obstáculos.',attr:'Força',bonus:12,type:'permanente'},
- tenis:{name:'Tênis de corrida',description:'Concede +12% em Velocidade e ajuda em fugas e travessias perigosas.',attr:'Velocidade',bonus:12,type:'permanente'},
- sinal:{name:'Sinalizadores',description:'Concede +18% em Furtividade enquanto disponível. Pode ser consumido para distrair infectados.',attr:'Furtividade',bonus:18,type:'consumivel'},
- lanterna:{name:'Lanterna',description:'Concede +12% em Furtividade e libera uma ação especial em áreas escuras.',attr:'Furtividade',bonus:12,type:'permanente'},
- colete:{name:'Colete',description:'Concede +8% em Vigor. Ao falhar em um teste que causaria sua morte, absorve uma falha e é consumido.',attr:'Vigor',bonus:8,type:'defensivo'},
- kit:{name:'Kit de primeiros socorros',description:'Concede +20% em Vigor enquanto disponível e pode ser consumido para tratar ferimentos em uma ação especial.',attr:'Vigor',bonus:20,type:'consumivel'},
- faca:{name:'Faca de resgate',description:'Equipamento permanente. Concede +12% em testes de Força e libera uma ação especial para atacar o Anfitrião de perto.',attr:'Força',bonus:12,type:'permanente'},
- mascara:{name:'Máscara filtrante',description:'Equipamento permanente. Concede +12% em testes de Vigor e libera uma ação especial para se proteger de fluidos e partículas infectadas.',attr:'Vigor',bonus:12,type:'permanente'},
- radio:{name:'Rádio portátil',description:'Equipamento permanente. Concede +12% em testes de Furtividade e libera uma ação especial para coordenar uma distração à distância.',attr:'Furtividade',bonus:12,type:'permanente'}
+ pistola:{name:'Pistola',description:'Libera escolhas de tiro e concede +5 pontos em testes de Pontaria. Não consome munição por padrão.',attr:'Pontaria',bonus:5,type:'weapon'},
+ municao:{name:'Munição',description:'Concede +4 pontos em Pontaria enquanto disponível. É consumida em ações que exigem disparos.',attr:'Pontaria',bonus:4,type:'consumivel'},
+ pe:{name:'Pé de cabra',description:'Concede +5 pontos em Força e libera ações especiais para arrombar portas e obstáculos.',attr:'Força',bonus:5,type:'permanente'},
+ tenis:{name:'Tênis de corrida',description:'Concede +5 pontos em Velocidade e ajuda em fugas e travessias perigosas.',attr:'Velocidade',bonus:5,type:'permanente'},
+ sinal:{name:'Sinalizadores',description:'Concede +6 pontos em Furtividade enquanto disponível. Pode ser consumido para distrair infectados.',attr:'Furtividade',bonus:6,type:'consumivel'},
+ lanterna:{name:'Lanterna',description:'Concede +5 pontos em Furtividade e libera uma ação especial em áreas escuras.',attr:'Furtividade',bonus:5,type:'permanente'},
+ colete:{name:'Colete',description:'Concede +4 pontos em Vigor. Ao falhar em um teste que causaria sua morte, absorve uma falha e é consumido.',attr:'Vigor',bonus:4,type:'defensivo'},
+ kit:{name:'Kit de primeiros socorros',description:'Concede +7 pontos em Vigor enquanto disponível e pode ser consumido para tratar ferimentos em uma ação especial.',attr:'Vigor',bonus:7,type:'consumivel'},
+ faca:{name:'Faca de resgate',description:'Equipamento permanente. Concede +5 pontos em testes de Força e libera uma ação especial para atacar o Anfitrião de perto.',attr:'Força',bonus:5,type:'permanente'},
+ mascara:{name:'Máscara filtrante',description:'Equipamento permanente. Concede +5 pontos em testes de Vigor e libera uma ação especial para se proteger de fluidos e partículas infectadas.',attr:'Vigor',bonus:5,type:'permanente'},
+ radio:{name:'Rádio portátil',description:'Equipamento permanente. Concede +5 pontos em testes de Furtividade e libera uma ação especial para coordenar uma distração à distância.',attr:'Furtividade',bonus:5,type:'permanente'}
 };
 const ZOMBIE_DIFFICULTIES={
  facil:{label:'Fácil',modifier:10},
