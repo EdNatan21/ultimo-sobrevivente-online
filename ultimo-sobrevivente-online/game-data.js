@@ -17,41 +17,90 @@ const ITEM={
  radio:{name:'Rádio portátil',description:'Equipamento permanente. Concede +5 pontos em testes de Furtividade e libera uma ação especial para coordenar uma distração à distância.',attr:'Furtividade',bonus:5,type:'permanente'}
 };
 const ZOMBIE_DIFFICULTIES={
- facil:{label:'Fácil',modifier:10},
+ facil:{label:'Fácil',modifier:5},
  normal:{label:'Normal',modifier:0},
- dificil:{label:'Difícil',modifier:-10}
+ dificil:{label:'Difícil',modifier:-5}
 };
-const STAGE_MODIFIERS=[0,-2,-4,-7,-10,-13,-16,-20,-24,-28];
+// Probabilidades-base diminuem conforme os infectados evoluem.
+const STAGE_BASES=[
+ {facil:90,medio:82,dificil:72}, // cenas 1 a 4: infectados lentos
+ {facil:80,medio:70,dificil:58}, // cenas 5 a 8: infectados rápidos
+ {facil:68,medio:55,dificil:40}  // cenas 9 e 10: chefe
+];
+const STAGE_MAX_CHANCE=[95,85,70];
 const S=[
- {title:'A festa vira caos',threat:'ZUMBIS LENTOS',story:'Na cobertura, um convidado cai, se contorce e morde o homem ao lado. As luzes piscam. A multidão corre para a saída — e os primeiros infectados se levantam.',opts:[['Correr ao escritório e pegar a pistola','Velocidade','dificil','pistola'],['Escapar pela cozinha sem chamar atenção','Furtividade','medio',null,{usesSignal:true}],['Abrir caminho pela multidão até a porta','Força','facil'],['Se esconder atrás do bar e esperar a multidão passar','Furtividade','medio'],['Quebrar uma janela lateral e sair pelo toldo','Força','dificil']]},
- {title:'A escadaria',threat:'ZUMBIS LENTOS',story:'A escadaria está tomada por convidados cambaleantes. O elevador de serviço está aberto, mas faz barulho. Uma janela dá para o toldo do térreo.',opts:[['Empurrar os infectados e descer','Força','facil'],['Descer pelo elevador de serviço em silêncio','Furtividade','medio',null,{usesSignal:true}],['Saltar pela janela até o toldo e pegar o colete','Vigor','dificil','colete'],['Improvisar uma corda com cortinas e descer','Força','medio'],['Atravessar o corredor de serviço entre os infectados','Velocidade','dificil']]},
- {title:'A garagem',threat:'ZUMBIS LENTOS',story:'Alarmes disparam entre os carros. Há um porta-malas aberto com um pé de cabra. Os gemidos se aproximam pelo acesso da rua.',opts:[['Pegar o pé de cabra no porta-malas','Força','dificil','pe'],['Acionar um alarme distante e passar escondido','Furtividade','facil',null,{usesSignal:true}],['Correr entre os carros até a saída','Velocidade','medio'],['Usar um carro como cobertura até a saída','Vigor','medio'],['Esgueirar-se pelo duto de manutenção','Furtividade','dificil']]},
- {title:'A praça',threat:'ZUMBIS LENTOS',story:'A praça está tomada. Uma loja de esportes teve a vitrine quebrada; um túnel de manutenção parece vazio, mas está mergulhado na escuridão.',opts:[['Entrar na loja e pegar tênis de corrida','Furtividade','dificil','tenis'],['Atravessar o túnel escuro sem ser visto','Furtividade','medio',null,{usesSignal:true}],['Forçar passagem pela praça','Vigor','facil'],['Usar uma banca tombada como proteção e avançar','Vigor','medio'],['Subir em um ponto de ônibus e saltar para o outro lado','Velocidade','dificil']]},
- {title:'A sirene',threat:'ZUMBIS RÁPIDOS',story:'Uma sirene corta a noite. Os infectados mudam de comportamento: agora correm. Uma viatura está abandonada no meio da avenida.',opts:[['Pegar sinalizadores no porta-luvas','Velocidade','dificil','sinal'],['Se esconder dentro da viatura até os corredores passarem','Furtividade','medio'],['Subir em um ônibus e bloquear as portas','Força','facil'],['Entrar em um prédio e atravessar pelos fundos','Furtividade','medio'],['Derrubar uma barricada para bloquear os corredores','Força','dificil']]},
- {title:'O mercado',threat:'ZUMBIS RÁPIDOS',story:'As prateleiras estão no chão. Passos velozes ecoam pelos corredores. Na sala dos funcionários pode haver uma lanterna; uma saída de manutenção fica no alto.',opts:[['Encontrar a lanterna na sala dos funcionários','Furtividade','dificil','lanterna'],['Se esconder no frigorífico e esperar','Vigor','facil'],['Escalar as prateleiras até a saída superior','Velocidade','medio'],['Passar pelo depósito de carga sem fazer barulho','Furtividade','medio'],['Empurrar um carrinho pesado para bloquear o corredor','Força','dificil']]},
- {title:'O metrô',threat:'ZUMBIS RÁPIDOS',story:'A estação é um atalho para o porto. Está escura. Um policial caído ainda carrega munição no cinto, mas os infectados já invadiram a plataforma.',opts:[['Pegar a munição do policial','Pontaria','dificil','municao'],['Correr pelos trilhos até a próxima saída','Velocidade','medio'],['Avançar rente à parede sem fazer ruído','Furtividade','facil',null,{usesSignal:true}],['Atravessar a plataforma usando as colunas como cobertura','Velocidade','medio'],['Forçar a porta técnica da estação','Força','dificil']]},
- {title:'A mordida',threat:'ZUMBIS RÁPIDOS',story:'Na saída, um infectado ferido agarra seu braço. Um kit médico está caído perto do ponto de ônibus. Você sente que não há tempo para hesitar.',opts:[['Se soltar e alcançar o kit médico','Vigor','dificil','kit'],['Afastar o infectado com um chute','Força','medio'],['Desviar e correr em direção ao cais','Velocidade','facil'],['Subir em uma marquise para escapar do alcance','Velocidade','medio'],['Se fingir de morto até o infectado se afastar','Furtividade','dificil']]},
- {title:'O pátio do porto',threat:'CHEFE: O ANFITRIÃO',story:'Entre os contêineres surge o anfitrião da festa. O corpo está deformado, enorme, mas o terno ainda é reconhecível. O navio apita ao fundo.',opts:[['Derrubar uma grade metálica para separar o grupo da criatura','Força','dificil'],['Contornar os contêineres em silêncio','Furtividade','medio',null,{usesSignal:true}],['Correr pelo corredor entre os contêineres','Velocidade','medio'],['Atrair o Anfitrião para uma armadilha entre contêineres','Furtividade','dificil'],['Escalar os contêineres e contornar a criatura','Força','medio']]},
- {title:'A rampa do navio',threat:'CHEFE: ÚLTIMO CONFRONTO',story:'O Anfitrião alcança o cais. A rampa está subindo e o motor já está ligado. É agora ou nunca: embarcar ou desaparecer com a cidade.',opts:[['Prender a criatura com a corrente de carga do cais','Força','dificil'],['Derrubar uma estrutura metálica sobre ele','Força','dificil'],['Correr e saltar para a rampa do navio','Velocidade','dificil'],['Usar os cabos do cais para balançar até a rampa','Velocidade','dificil'],['Proteger um companheiro e avançar em conjunto','Vigor','dificil']]}
+ {title:'A festa vira caos',threat:'ZUMBIS LENTOS',story:'Na cobertura, um convidado cai, se contorce e morde o homem ao lado. As luzes piscam. A multidão corre para a saída — e os primeiros infectados se levantam.',opts:[
+  ['Invadir o escritório e recuperar a pistola','Pontaria','dificil','pistola'],
+  ['Escapar pela cozinha sem chamar atenção','Furtividade','medio'],
+  ['Abrir caminho pela multidão até a porta','Força','facil'],
+  ['Quebrar a janela lateral e sair pelo toldo','Força','dificil','faca'],
+  ['Ajudar um convidado ferido a atravessar a sala','Vigor','medio']
+ ]},
+ {title:'A escadaria',threat:'ZUMBIS LENTOS',story:'A escadaria está tomada por convidados cambaleantes. O elevador de serviço está aberto, mas faz barulho. Uma janela dá para o toldo do térreo.',opts:[
+  ['Saltar pela janela até o toldo e recuperar o colete','Vigor','dificil','colete'],
+  ['Entrar no depósito de limpeza e pegar uma máscara filtrante','Furtividade','dificil','mascara'],
+  ['Descer pelo elevador de serviço em silêncio','Pontaria','medio'],
+  ['Empurrar os infectados e descer','Força','facil'],
+  ['Descer pelo corrimão externo até o saguão','Velocidade','medio']
+ ]},
+ {title:'A garagem',threat:'ZUMBIS LENTOS',story:'Alarmes disparam entre os carros. Há um porta-malas aberto com um pé de cabra. Os gemidos se aproximam pelo acesso da rua.',opts:[
+  ['Pegar o pé de cabra no porta-malas','Força','dificil','pe'],
+  ['Arremessar uma ferramenta contra um alarme distante','Pontaria','medio'],
+  ['Correr entre os carros até a saída','Velocidade','medio'],
+  ['Usar um carro como cobertura até a saída','Vigor','medio'],
+  ['Acionar um alarme distante e passar escondido','Furtividade','facil']
+ ]},
+ {title:'A praça',threat:'ZUMBIS LENTOS',story:'A praça está tomada. Uma loja de esportes teve a vitrine quebrada; um túnel de manutenção parece vazio, mas está mergulhado na escuridão.',opts:[
+  ['Entrar na loja e pegar tênis de corrida','Velocidade','dificil','tenis'],
+  ['Invadir a guarita e pegar um rádio portátil','Furtividade','dificil','radio'],
+  ['Arremessar uma garrafa para distrair os infectados','Pontaria','medio'],
+  ['Forçar passagem pela praça','Vigor','facil'],
+  ['Empurrar uma banca para bloquear a passagem','Força','medio']
+ ]},
+ {title:'A sirene',threat:'ZUMBIS RÁPIDOS',story:'Uma sirene corta a noite. Os infectados mudam de comportamento: agora correm. Uma viatura está abandonada no meio da avenida.',opts:[
+  ['Pegar sinalizadores no porta-luvas','Furtividade','dificil','sinal'],
+  ['Se esconder dentro da viatura até os corredores passarem','Vigor','medio'],
+  ['Subir em um ônibus e bloquear as portas','Força','facil'],
+  ['Atingir o mecanismo da cancela para abrir passagem','Pontaria','medio'],
+  ['Cruzar a avenida em uma arrancada até a calçada','Velocidade','medio']
+ ]},
+ {title:'O mercado',threat:'ZUMBIS RÁPIDOS',story:'As prateleiras estão no chão. Passos velozes ecoam pelos corredores. Na sala dos funcionários pode haver uma lanterna; uma saída de manutenção fica no alto.',opts:[
+  ['Encontrar a lanterna na sala dos funcionários','Furtividade','dificil','lanterna'],
+  ['Se esconder no frigorífico e esperar','Vigor','facil'],
+  ['Escalar as prateleiras até a saída superior','Velocidade','medio'],
+  ['Derrubar uma pilha de caixas sobre o corredor','Força','medio'],
+  ['Acertar o botão do alarme de incêndio à distância','Pontaria','dificil']
+ ]},
+ {title:'O metrô',threat:'ZUMBIS RÁPIDOS',story:'A estação é um atalho para o porto. Está escura. Um policial caído ainda carrega munição no cinto, mas os infectados já invadiram a plataforma.',opts:[
+  ['Pegar a munição do policial','Pontaria','dificil','municao'],
+  ['Correr pelos trilhos até a próxima saída','Velocidade','medio'],
+  ['Avançar rente à parede sem fazer ruído','Furtividade','facil'],
+  ['Forçar a porta técnica da estação','Força','medio'],
+  ['Atravessar a plataforma protegendo a respiração','Vigor','medio']
+ ]},
+ {title:'A mordida',threat:'ZUMBIS RÁPIDOS',story:'Na saída, um infectado ferido agarra seu braço. Um kit médico está caído perto do ponto de ônibus. Você sente que não há tempo para hesitar.',opts:[
+  ['Se soltar e alcançar o kit médico','Vigor','dificil','kit'],
+  ['Afastar o infectado com um chute','Força','medio'],
+  ['Desviar e correr em direção ao cais','Velocidade','facil'],
+  ['Arremessar um objeto para afastar o infectado','Pontaria','medio'],
+  ['Se fingir de morto até o infectado se afastar','Furtividade','medio']
+ ]},
+ {title:'O pátio do porto',threat:'CHEFE: O ANFITRIÃO',story:'Entre os contêineres surge o anfitrião da festa. O corpo está deformado, enorme, mas o terno ainda é reconhecível. O navio apita ao fundo.',opts:[
+  ['Derrubar uma grade metálica para separar o grupo da criatura','Força','dificil'],
+  ['Contornar os contêineres em silêncio','Furtividade','medio'],
+  ['Correr pelo corredor entre os contêineres','Velocidade','medio'],
+  ['Acertar um ponto fraco da criatura com um objeto','Pontaria','dificil'],
+  ['Resistir à investida e proteger o grupo','Vigor','medio']
+ ]},
+ {title:'A rampa do navio',threat:'CHEFE: ÚLTIMO CONFRONTO',story:'O Anfitrião alcança o cais. A rampa está subindo e o motor já está ligado. É agora ou nunca: embarcar ou desaparecer com a cidade.',opts:[
+  ['Prender a criatura com a corrente de carga do cais','Força','dificil'],
+  ['Contornar o Anfitrião sem chamar sua atenção','Furtividade','medio'],
+  ['Correr e saltar para a rampa do navio','Velocidade','dificil'],
+  ['Acertar o mecanismo da rampa para mantê-la aberta','Pontaria','dificil'],
+  ['Proteger um companheiro e avançar em conjunto','Vigor','medio']
+ ]}
 ];
-// Rotas alternativas adicionais para dar mais liberdade de decisão em cada cena.
-const EXTRA_OPTIONS=[
- [['Arrombar o armário de segurança e pegar uma faca de resgate','Força','dificil','faca'],['Escapar pela varanda de manutenção usando a tubulação','Velocidade','dificil']],
- [['Entrar no depósito de limpeza e pegar uma máscara filtrante','Vigor','dificil','mascara'],['Descer pelo corrimão externo até o saguão','Velocidade','medio']],
- [['Atravessar o fosso de manutenção entre os carros','Velocidade','dificil'],['Empurrar um veículo contra o portão para abrir passagem','Força','dificil']],
- [['Invadir a guarita e pegar um rádio portátil','Furtividade','dificil','radio'],['Atravessar a fonte para reduzir o ruído dos passos','Furtividade','medio']],
- [['Se esconder sob o viaduto até a horda passar','Furtividade','medio'],['Cruzar a avenida pela faixa exclusiva dos ônibus','Velocidade','dificil']],
- [['Abrir a câmara fria e sair pelo duto de carga','Força','medio'],['Ativar os sprinklers para confundir os infectados','Furtividade','medio']],
- [['Saltar para a plataforma oposta usando os bancos','Velocidade','dificil'],['Acionar o painel de emergência da estação','Força','dificil']],
- [['Entrar na ambulância e improvisar um curativo','Vigor','dificil'],['Deslizar por baixo da porta corta-fogo antes que feche','Velocidade','medio']],
- [['Derrubar uma pilha de pallets para distrair o Anfitrião','Força','dificil'],['Subir na empilhadeira e passar sobre os contêineres','Velocidade','dificil']],
- [['Segurar a rampa para permitir que os outros embarquem','Força','dificil'],['Cortar a amarra da carga para derrubar uma barreira','Força','dificil']]
-];
-S.forEach((scene,index)=>scene.opts.push(...EXTRA_OPTIONS[index]));
-
-// Ações especiais adicionais só aparecem quando o jogador possui o item indicado.
 const SPECIAL_OPTIONS={
- 1:{pistola:['Disparar para abrir passagem entre os infectados','Pontaria','medio',null,{specialItem:'pistola',usesAmmo:true}]},
  3:{pe:['Usar o pé de cabra para abrir o portão de manutenção','Força','medio',null,{specialItem:'pe'}]},
  4:{tenis:['Usar os tênis para cruzar a avenida antes dos corredores alcançarem vocês','Velocidade','medio',null,{specialItem:'tenis'}],pistola:['Atirar nos primeiros corredores para ganhar tempo','Pontaria','medio',null,{specialItem:'pistola',usesAmmo:true}]},
  6:{lanterna:['Usar a lanterna para iluminar os trilhos e localizar uma saída segura','Furtividade','facil',null,{specialItem:'lanterna'}]},
@@ -71,4 +120,4 @@ const SCENE_CONTEXT=[
  {location:'Pátio externo do Porto de Santa Marina.',history:'Depois de atravessarem as últimas ruas, vocês chegaram ao porto. O navio de evacuação está preparado, mas algo enorme bloqueia o caminho.'},
  {location:'Rampa de embarque do navio de evacuação.',history:'O grupo enfrentou a criatura no pátio. O navio começou a recolher a rampa; esta é a última oportunidade de embarcar.'}
 ];
-if (typeof module !== "undefined") module.exports = { ATTRS, ITEM, S, SCENE_CONTEXT, SPECIAL_OPTIONS, ZOMBIE_DIFFICULTIES, STAGE_MODIFIERS };
+if (typeof module !== "undefined") module.exports = { ATTRS, ITEM, S, SCENE_CONTEXT, SPECIAL_OPTIONS, ZOMBIE_DIFFICULTIES, STAGE_BASES, STAGE_MAX_CHANCE };

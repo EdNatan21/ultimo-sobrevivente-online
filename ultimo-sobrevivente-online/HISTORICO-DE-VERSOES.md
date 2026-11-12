@@ -2,6 +2,16 @@
 
 Este arquivo registra as alterações conhecidas do projeto. Nas versões antigas, algumas datas e detalhes não estavam registrados nos arquivos preservados; nesses casos, o histórico informa apenas o que foi possível confirmar, sem inventar mudanças.
 
+## v0.6.3 — 12/11/2026
+- Reduzidas as escolhas comuns de sete para cinco por cena; ações especiais condicionadas a itens continuam adicionais.
+- Regras de repetição de atributo: no máximo duas opções do mesmo atributo; quando repetidas, uma deve oferecer recompensa e ser difícil, enquanto a outra não pode ser difícil.
+- Todas as escolhas que oferecem recompensa foram classificadas como difíceis.
+- Penalidade das escolhas com recompensa reduzida de 10 para 5 pontos percentuais.
+- Probabilidades-base passam a acompanhar a evolução dos infectados: lentos (cenas 1–4), rápidos (5–8) e chefe (9–10).
+- Tetos de probabilidade por fase: 95%, 85% e 70%, respectivamente; dificuldade global do anfitrião ajustada para +5/0/-5.
+- Removido o negrito do texto principal das escolhas.
+- Atualizados testes automatizados, interface, dados compartilhados e documentação.
+
 ## v0.6.2 — 12/11/2026
 - Probabilidade-base por nível de escolha: Fácil 68, Médio 52 e Difícil 36.
 - Escolhas que oferecem recompensa recebem penalidade-base de 10 pontos em relação a opções sem recompensa do mesmo nível.

@@ -3,7 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const crypto = require('crypto');
 const path = require('path');
-const { ATTRS, ITEM, S, SCENE_CONTEXT, ZOMBIE_DIFFICULTIES, STAGE_MODIFIERS } = require('./game-data');
+const { ATTRS, ITEM, S, SCENE_CONTEXT, ZOMBIE_DIFFICULTIES, STAGE_MAX_CHANCE } = require('./game-data');
 const { hasItem, getPlayerOptions, chanceFor } = require('./game-rules');
 
 const app = express();
@@ -21,11 +21,13 @@ const validStats = a => Array.isArray(a) && a.length === 5 && a.every(n => Numbe
 const alivePlayers = r => [...r.players.values()].filter(p => p.alive);
 function roomState(r, viewer) {
   const revealChoices = r.phase === 'results' || (alivePlayers(r).length > 0 && alivePlayers(r).every(p => p.choice !== null));
-  const stageModifier = STAGE_MODIFIERS[r.round] ?? 0;
+  const stageIndex = r.round <= 3 ? 0 : r.round <= 7 ? 1 : 2;
+  const zombieLevel = stageIndex === 0 ? 'Lentos' : stageIndex === 1 ? 'Rápidos' : 'Chefe';
   const scene = r.phase === 'lobby' ? null : {
     ...S[r.round], context: SCENE_CONTEXT[r.round],
     opts: viewer ? getPlayerOptions(viewer, r.round) : S[r.round].opts,
-    stageModifier,
+    zombieLevel,
+    stageMaxChance: STAGE_MAX_CHANCE[stageIndex],
     zombieModifier: ZOMBIE_DIFFICULTIES[r.zombieDifficulty]?.modifier ?? 0
   };
   return {

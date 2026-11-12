@@ -31,7 +31,7 @@ A história começa durante a festa no Edifício Aurora. O grupo precisa escapar
 
 ## Como as escolhas afetam a história
 
-Cada jogador escolhe uma ação com base em Pontaria, Velocidade, Força, Furtividade ou Vigor. O servidor calcula a chance de sucesso considerando os atributos, os itens, a dificuldade escolhida pelo anfitrião e a progressão da campanha. A chance nunca ultrapassa 70%. Uma falha pode levar à eliminação; o colete pode absorver uma falha fatal uma única vez.
+Cada jogador escolhe uma ação com base em Pontaria, Velocidade, Força, Furtividade ou Vigor. O servidor calcula a chance de sucesso considerando os atributos, os itens, a dificuldade escolhida pelo anfitrião e a progressão da campanha. O teto da chance diminui conforme a ameaça evolui: 95% contra infectados lentos, 85% contra rápidos e 70% no confronto com o chefe. Uma falha pode levar à eliminação; o colete pode absorver uma falha fatal uma única vez.
 
 Algumas ações permitem encontrar equipamentos. Quando mais de um jogador consegue a mesma recompensa, ocorre uma disputa com rolagens de d20; empates nos maiores resultados geram novas rodadas de desempate. Itens podem conceder bônus permanentes, ser consumidos ou liberar ações especiais.
 

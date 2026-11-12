@@ -1,4 +1,4 @@
-# Último Sobrevivente — Multiplayer v0.6.2
+# Último Sobrevivente — Multiplayer v0.6.3
 
 Jogo web multiplayer de sobrevivência zumbi para 2 a 8 pessoas. Os jogadores atravessam dez cenas, fazem escolhas individuais, encontram equipamentos e tentam alcançar o navio de evacuação.
 
@@ -38,9 +38,9 @@ Para validar as regras, execute `npm test`.
 - De 2 a 8 jogadores podem participar.
 - Cada jogador distribui 10 pontos entre Pontaria, Velocidade, Força, Furtividade e Vigor, com máximo de 5 por atributo.
 - O anfitrião inicia a partida quando todos estiverem prontos e escolhe a dificuldade dos zumbis.
-- Cada cena oferece sete escolhas comuns diferentes. Ações especiais adicionais aparecem quando o jogador possui o item exigido.
+- Cada cena oferece cinco escolhas comuns. Uma ação adicional pode aparecer quando o jogador possui o item específico exigido; essas ações especiais não contam no limite de cinco.
 - As escolhas ficam ocultas para os demais até todos os jogadores vivos escolherem. Depois disso, o grupo vê as escolhas e os resultados. O servidor resolve os testes e as disputas de recompensas.
-- A chance de sucesso considera atributo, item, dificuldade e etapa da campanha; fica entre 5% e 70%.
+- A chance de sucesso considera atributo, item, dificuldade escolhida pelo anfitrião e nível dos infectados. O teto é progressivo: 95% contra infectados lentos, 85% contra rápidos e 70% no confronto com o chefe.
 - Após os resultados, somente os jogadores vivos precisam confirmar para avançar. O anfitrião pode forçar a próxima cena sem esperar as confirmações pendentes.
 - O anfitrião pode encerrar a campanha a qualquer momento.
 
@@ -64,14 +64,25 @@ Os itens podem conceder bônus de atributo, liberar ações especiais, ser consu
 
 ## Dificuldade e probabilidades
 
-- **Fácil:** base de 68 pontos percentuais.
-- **Médio:** base de 52 pontos percentuais.
-- **Difícil:** base de 36 pontos percentuais.
-- Escolhas que oferecem uma recompensa começam com 10 pontos percentuais a menos que escolhas sem recompensa do mesmo nível.
-- Cada ponto no atributo usado acrescenta 4 pontos percentuais; itens concedem bônus reduzidos, entre 4 e 7 pontos percentuais.
-- A dificuldade global dos zumbis e a progressão das cenas também modificam a chance; o resultado final permanece entre 5% e 70%.
+As probabilidades-base diminuem conforme os infectados evoluem:
 
-A campanha aplica penalidades progressivas conforme os infectados se tornam mais perigosos. O limite máximo continua em 70%, mesmo com atributos e itens elevados.
+| Nível dos infectados | Fácil | Médio | Difícil | Teto da fase |
+|---|---:|---:|---:|---:|
+| Cenas 1–4: lentos | 90% | 82% | 72% | 95% |
+| Cenas 5–8: rápidos | 80% | 70% | 58% | 85% |
+| Cenas 9–10: chefe | 68% | 55% | 40% | 70% |
+
+- Escolhas que oferecem recompensa recebem penalidade de 5 pontos percentuais e são sempre classificadas como difíceis.
+- Cada ponto no atributo usado acrescenta 4 pontos percentuais; os itens continuam concedendo bônus de atributo.
+- A dificuldade escolhida pelo anfitrião aplica +5 pontos (Fácil), 0 (Normal) ou -5 pontos (Difícil).
+- A probabilidade final nunca ultrapassa o teto da fase nem fica abaixo de 5%.
+
+## Organização das escolhas
+
+- Cada cena possui exatamente cinco escolhas comuns.
+- Um atributo não se repete, exceto quando aparece em duas opções: uma delas precisa oferecer recompensa e ser difícil; a outra não pode ser difícil.
+- Ações especiais desbloqueadas por itens aparecem além das cinco escolhas comuns e são contextualizadas para o item possuído.
+- As opções com recompensa são mais arriscadas e a recompensa só é disputada quando a ação é bem-sucedida.
 
 ## Limitações conhecidas
 

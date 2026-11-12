@@ -1,4 +1,4 @@
-ÚLTIMO SOBREVIVENTE — MULTIPLAYER v0.6.2
+ÚLTIMO SOBREVIVENTE — MULTIPLAYER v0.6.3
 
 EXECUTAR LOCALMENTE
 1. Instale Node.js 20 ou superior.
@@ -15,14 +15,13 @@ PUBLICAR NO RENDER
 - Build Command: npm install
 - Start Command: npm start
 
-NOVIDADES v0.6.2
-- Sete escolhas comuns diferentes em cada cena, sem opções duplicadas.
-- Novas recompensas: Faca de resgate, Máscara filtrante e Rádio portátil.
-- Recompensas e itens do inventário exibem seus efeitos ao passar o mouse ou receber foco pelo teclado.
-- Ações especiais liberadas pelas novas recompensas.
-- Resultados e desempates com explicações mais claras.
-- Jogadores eliminados também podem confirmar a continuidade da campanha.
-- Documentação atualizada: HISTORICO-DE-VERSOES.md e HISTORIA-DO-JOGO.md.
+NOVIDADES v0.6.3
+- Cinco escolhas comuns por cena; ações especiais continuam aparecendo quando liberadas por itens.
+- Probabilidades diminuem conforme os infectados evoluem: lentos, rápidos e chefe.
+- Recompensas exigem escolhas difíceis e aplicam penalidade de 5 pontos percentuais.
+- Repetição de atributo limitada a duas escolhas, com regra específica para a opção que oferece recompensa.
+- Removido o negrito do texto principal das escolhas.
+- Atualizados testes automatizados e documentação.
 
 ARQUIVOS IMPORTANTES
 - README.md: instalação, publicação e regras completas.

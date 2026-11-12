@@ -1,8 +1,8 @@
 {
   "name": "ultimo-sobrevivente",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "private": true,
-  "description": "Jogo multiplayer de sobrevivência zumbi com níveis de dificuldade, escolhas ocultas e controle de avanço pelo anfitrião",
+  "description": "Jogo multiplayer de sobrevivência zumbi com cinco escolhas por cena e dificuldade progressiva conforme os infectados",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
